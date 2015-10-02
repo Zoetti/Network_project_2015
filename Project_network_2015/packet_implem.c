@@ -52,7 +52,7 @@ pkt_t* pkt_new()
 
 void pkt_del(pkt_t *pkt)
 {
-    free()
+    free(pkt);
 }
 
 /*
