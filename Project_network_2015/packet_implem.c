@@ -7,9 +7,21 @@
 
 #include "packet_interface.h"
 
-/* Extra #includes */
-/* Your code will be inserted here */
+#include <stdlib.h>
+#include <stdio.h>
+#include <zlib.h>
 
+
+/*
+ * The following tructure represents a packet sent by the Sender program.
+ * In this structure :
+ *     - type represents the type of packet sent (ack or data),
+ *     - window the size of the receiving window,
+ *     - seqNum the sequence number of the packet sent,
+ *     - length the total length of the payload,
+ *     - crc is the crc computed for this packet,
+ *     - payload contains the data (total of 512 bytes) and must be empty for ack packets.
+ */
 struct __attribute__((__packed__)) pkt {
     /* Your code will be inserted here */
     ptypes_t type;
@@ -20,15 +32,21 @@ struct __attribute__((__packed__)) pkt {
     const char* payload[512];
 };
 
-/* Extra code */
-/* Your code will be inserted here */
-
+/* The following function allocates bytes for à packet structure and returns
+ * a pointer to the allocated memory or retuns NULL
+ */
 pkt_t* pkt_new()
 {
-    /* Your code will be inserted here */
-    if (/*syst out of mem*/) {
+    pkt_t* packet;
+    size_t size = sizeof(pkt_t);
+    packet = (pkt_t*) malloc(size);
+    
+    if (packet == NULL) {
+        fprintf(stderr,"Impossible allocation \n");
         return NULL;
     }
+    
+    return packet;
     
 }
 
@@ -37,9 +55,28 @@ void pkt_del(pkt_t *pkt)
     free()
 }
 
+/*
+ * this function decode data that has been received and create a new pkt_t from it.
+ * This functions performs the following checks:
+ * - Validates the CRC32 of the received data against the one present at the
+ *   end of the data stream
+ * - Validates the type of the packet
+ * - Validates the length of the packet
+*/
 pkt_status_code pkt_decode(const char *data, const size_t len, pkt_t *pkt)
 {
-    /* Your code will be inserted here */
+    if(pkt->crc != crc32(0L,(const Bytef*) data,sizeof(pkt_t))) {
+        return E_CRC;
+    }
+    else if (pkt->type != PTYPE_DATA || pkt->type != PTYPE_ACK || pkt->type != PTYPE_NACK) {
+        return E_TYPE;
+    }
+    else if (!(0 <= pkt->length) || !(pkt->length <= 512)) {
+        return E_LENGTH;
+    }
+    else {
+        return PKT_OK;
+    }
 }
 
 pkt_status_code pkt_encode(const pkt_t* pkt, char *buf, size_t *len)
