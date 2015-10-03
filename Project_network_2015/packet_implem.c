@@ -9,6 +9,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <zlib.h>
 
 
@@ -95,12 +96,15 @@ pkt_status_code pkt_decode(const char *data, const size_t len, pkt_t *pkt)
 
 pkt_status_code pkt_encode(const pkt_t* pkt, char *buf, size_t *len)
 {
+    uint8_t pkt_bytes [sizeof(pkt_t)];
+    memcpy(pkt_bytes, pkt, sizeof(pkt_t));
     uLong crc = crc32(0L, Z_NULL, 0);
-    pkt_set_crc(pkt, crc32(crc, (const Bytef) pkt , pkt->length));
-    if (sizeof(pkt->crc) > *len){
+    pkt_set_crc(pkt, crc32(crc, pkt_bytes , pkt->length));
+    if (sizeof(pkt_t) > *len){
         return E_NOMEM;
     }
-    *len = *len+sizeof(pkt->crc);
+    *buf = *pkt_bytes;
+    *len = sizeof(pkt_t);
     return PKT_OK;
 }
 
