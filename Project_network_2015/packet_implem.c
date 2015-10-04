@@ -165,5 +165,7 @@ pkt_status_code pkt_set_payload(pkt_t *pkt,
     if (length % 4 != 0){
         return E_PADDING;
     }
+    
+    return PKT_OK;
         
 }
