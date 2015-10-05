@@ -190,11 +190,6 @@ pkt_status_code pkt_set_payload(pkt_t *pkt,
     if (length % 4 != 0){
         return E_PADDING;
     }
-<<<<<<< HEAD
-    
+
     return PKT_OK;
-        
-=======
-    return PKT_OK;
->>>>>>> ba1b1ec108b5094e011f742f39a93e0f79c07fe9
 }
