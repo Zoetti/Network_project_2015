@@ -30,7 +30,7 @@ struct __attribute__((__packed__)) pkt {
     uint8_t seqnum;
     uint16_t length;
     uint32_t crc;
-    const char* payload[512];
+    char payload[512];
 };
 
 /* The following function allocates bytes for à packet structure and returns
@@ -53,7 +53,6 @@ pkt_t* pkt_new()
 
 void pkt_del(pkt_t *pkt)
 {
-    free(pkt->payload);
     free(pkt);
 }
 
@@ -67,12 +66,15 @@ void pkt_del(pkt_t *pkt)
 */
 pkt_status_code pkt_decode(const char *data, const size_t len, pkt_t *pkt)
 {
+    //Check the CRC
     if(pkt->crc != crc32(0L,(const Bytef*) data,sizeof(pkt_t))) {
         return E_CRC;
     }
+    //Check if the type is right
     else if (pkt->type != PTYPE_DATA || pkt->type != PTYPE_ACK || pkt->type != PTYPE_NACK) {
         return E_TYPE;
     }
+    //Check the length
     else if (!(0 <= pkt->length) || !(pkt->length <= 512)) {
         return E_LENGTH;
     }
@@ -96,15 +98,18 @@ pkt_status_code pkt_decode(const char *data, const size_t len, pkt_t *pkt)
 
 pkt_status_code pkt_encode(const pkt_t* pkt, char *buf, size_t *len)
 {
-    uint8_t pkt_bytes [sizeof(pkt_t)];
-    memcpy(pkt_bytes, pkt, sizeof(pkt_t));
-    uLong crc = crc32(0L, Z_NULL, 0);
-    pkt_set_crc(pkt, crc32(crc, pkt_bytes , pkt->length));
     if (sizeof(pkt_t) > *len){
         return E_NOMEM;
     }
-    *buf = *pkt_bytes;
+    //flux de bytes du payload et du header (sans le CRC)
+    char* pkt_bytes = (char*)malloc(sizeof(pkt_t*)-4);
+    memcpy(pkt_bytes, pkt, sizeof(pkt_t)-4);
+    uLong crc = crc32(0L, Z_NULL, 0);
+    crc = crc32(crc, (const Bytef*)pkt_bytes , sizeof(pkt_t)-4);
+    //Buf = concat du flux et du crc calculé
+    memcpy(buf, strcat(pkt_bytes,(char*)crc), sizeof(pkt_t));
     *len = sizeof(pkt_t);
+    free(pkt_bytes);
     return PKT_OK;
 }
 
@@ -187,8 +192,12 @@ pkt_status_code pkt_set_payload(pkt_t *pkt,
                                 const char *data,
                                 const uint16_t length)
 {
-    if (length % 4 != 0){
-        return E_PADDING;
+    char* payload = (char*)malloc(pkt->length);
+    strcat(payload, data);
+    for (uint padding = length % 4; padding > 0; padding--) {
+        strcat(payload, NULL);
     }
+    memcpy(pkt->payload, payload, pkt->length);
+    free(payload);
     return PKT_OK;
 }
