@@ -29,8 +29,8 @@ struct __attribute__((__packed__)) pkt {
     uint8_t window;
     uint8_t seqnum;
     uint16_t length;
-    uint32_t crc;
     char payload[512];
+    uint32_t crc;
 };
 
 /* The following function allocates bytes for à packet structure and returns
@@ -103,6 +103,10 @@ pkt_status_code pkt_encode(const pkt_t* pkt, char *buf, size_t *len)
     }
     //flux de bytes du payload et du header (sans le CRC)
     char* pkt_bytes = (char*)malloc(sizeof(pkt_t*)-4);
+    if (pkt_bytes == NULL){
+        fprintf(stderr,"Impossible allocation \n");
+        return E_NOMEM;
+    }
     memcpy(pkt_bytes, pkt, sizeof(pkt_t)-4);
     uLong crc = crc32(0L, Z_NULL, 0);
     crc = crc32(crc, (const Bytef*)pkt_bytes , sizeof(pkt_t)-4);
@@ -156,28 +160,18 @@ pkt_status_code pkt_set_type(pkt_t *pkt, const ptypes_t type)
 
 pkt_status_code pkt_set_window(pkt_t *pkt, const uint8_t window)
 {
-    /* Your code will be inserted here */
-    if (window<0 && window>=MAX_WINDOW_SIZE){
-        return E_WINDOW;
-    }
     pkt->window = window;
     return PKT_OK;
 }
 
 pkt_status_code pkt_set_seqnum(pkt_t *pkt, const uint8_t seqnum)
 {
-    if (seqnum<0 && seqnum>=255){
-        return E_SEQNUM;
-    }
     pkt->seqnum = seqnum;
     return PKT_OK;
 }
 
 pkt_status_code pkt_set_length(pkt_t *pkt, const uint16_t length)
 {
-    if (length<0 && length>=512){
-        return E_LENGTH;
-    }
     pkt->length = length;
     return PKT_OK;
 }
@@ -194,8 +188,10 @@ pkt_status_code pkt_set_payload(pkt_t *pkt,
 {
     char* payload = (char*)malloc(pkt->length);
     strcat(payload, data);
-    for (uint padding = length % 4; padding > 0; padding--) {
+    uint padding = length % 4;
+    while (padding > 0){
         strcat(payload, NULL);
+        padding--;
     }
 
     memcpy(pkt->payload, payload, pkt->length);

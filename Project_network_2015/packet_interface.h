@@ -9,6 +9,11 @@
 #ifndef __PACKET_INTERFACE_H_
 #define __PACKET_INTERFACE_H_
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <zlib.h>
+
 #include <stddef.h> /* size_t */
 #include <stdint.h> /* uintx_t */
 
