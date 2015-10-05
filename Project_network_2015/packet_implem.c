@@ -13,6 +13,8 @@
 #include <zlib.h>
 
 
+size_t pkt_get_total_length(const pkt_t* pkt);
+char* pkt_copy(char *buf, pkt_t* pkt, size_t len);
 /*
  * The following tructure represents a packet sent by the Sender program.
  * In this structure :
@@ -151,32 +153,48 @@ pkt_status_code pkt_decode(const char *data, const size_t len, pkt_t *pkt)
  *
  */
 
-pkt_status_code pkt_encode(const pkt_t* pkt, char *buf, size_t *len)
+pkt_status_code pkt_encode(const pkt_t* pkt, char* buf, size_t* len)
 {
-    if (sizeof(pkt) > *len){
+    printf("length:%zu\n", *len);
+    if (pkt_get_total_length(pkt) > *len){
         return E_NOMEM;
     }
 
     //flux de bytes du payload et du header (sans le CRC)
-    char* pkt_bytes = (char*)malloc(sizeof(pkt)-4);
+    char* pkt_bytes = NULL;
+    pkt_bytes = (char*)malloc( sizeof(char *)*pkt_get_total_length(pkt));
+
     if (pkt_bytes == NULL){
         fprintf(stderr,"Impossible allocation \n");
         return E_NOMEM;
     }
-    memcpy(&pkt_bytes, pkt, sizeof(pkt)-4);
+    
+   // char * c = "UCLouvain";
+    printf("malloc\n");
+    memcpy(pkt_bytes, pkt, pkt_get_total_length(pkt)-4);
+    printf("mem1\n");
+
+    printf("pkt_byte : %s\n", pkt_bytes);
     uLong crc = crc32(0L, Z_NULL, 0);
-    crc = crc32(crc, (const Bytef*)pkt_bytes , sizeof(pkt)-4);
+    crc = crc32(crc, (const Bytef*)pkt_bytes ,(uInt) pkt_get_total_length(pkt)-4);
+    printf("crc:%lu\n",crc);
     //Buf = concat du flux et du crc calculé
-    memcpy(buf, pkt_bytes, sizeof(pkt)-4);
-    memcpy(buf, (char*)crc, 4);
-    *len = sizeof(buf);
+   
+    
+    memcpy(buf, pkt_bytes, pkt_get_total_length(pkt)-4);
+    printf("mem2\n");
+    //memcpy(buf, &crc, sizeof(uint32_t));
+    printf("mem3\n");
+    *len = strlen(buf);
+    printf("%s\n",buf);
     free(pkt_bytes);
     return PKT_OK;
-    return E_WINDOW;
+
 }
 
 ptypes_t pkt_get_type  (const pkt_t* pkt)
 {
+    printf("t:%u\n",pkt->type);
     return pkt->type;
 }
 
@@ -193,6 +211,10 @@ uint8_t  pkt_get_seqnum(const pkt_t* pkt)
 uint16_t pkt_get_length(const pkt_t* pkt)
 {
     return pkt->length;
+}
+
+size_t pkt_get_total_length(const pkt_t* pkt){
+    return 32+pkt_get_length(pkt);
 }
 
 uint32_t pkt_get_crc   (const pkt_t* pkt)
@@ -244,7 +266,7 @@ pkt_status_code pkt_set_payload(pkt_t *pkt,
                                 const char *data,
                                 const uint16_t length)
 {
-    uint padding = length % 4;
+    uint padding = 4-(length % 4);
     char* payload = (char*)malloc(pkt->length+padding);
     memcpy(payload, data, length);
     uint i = 1;
