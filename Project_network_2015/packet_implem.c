@@ -161,35 +161,58 @@ pkt_status_code pkt_encode(const pkt_t* pkt, char* buf, size_t* len)
     }
 
     //flux de bytes du payload et du header (sans le CRC)
-    char* pkt_bytes = NULL;
-    pkt_bytes = (char*)malloc( sizeof(char *)*pkt_get_total_length(pkt));
+    /*char* pkt_bytes = NULL;
+    pkt_bytes = (char*)malloc( sizeof(char *)*pkt_get_total_length(pkt)-4);
 
     if (pkt_bytes == NULL){
         fprintf(stderr,"Impossible allocation \n");
         return E_NOMEM;
-    }
+    }*/
     
-   // char * c = "UCLouvain";
     printf("malloc\n");
-    memcpy(pkt_bytes, pkt, pkt_get_total_length(pkt)-4);
-    printf("mem1\n");
+    //memcpy(pkt_bytes, pkt, pkt_get_total_length(pkt)-4);
+    
+ 
+    
+     printf("pkt: %u\n", pkt->type);
+    
+    char type[3], window[5], seqnum[8], length[16], crc2[4];
+    
+    sprintf(type, "%d", pkt->type);
+    sprintf(window, "%d", pkt->window);
+    sprintf(seqnum, "%d", pkt->seqnum);
+    sprintf(length, "%d", pkt->length);
+    
 
-    printf("pkt_byte : %s\n", pkt_bytes);
+    printf("pktttt: %s\n", type);
+    
+    char* buf2 = malloc(pkt_get_total_length(pkt));
+    
+    strcat(buf2, type);
+    strcat(buf2, window);
+    strcat(buf2, seqnum);
+    strcat(buf2, length);
+    strcat(buf2, pkt->payload);
+    
+    printf("BUFFER: %s\n", buf2);
+
+
+
+
     uLong crc = crc32(0L, Z_NULL, 0);
-    crc = crc32(crc, (const Bytef*)pkt_bytes ,(uInt) pkt_get_total_length(pkt)-4);
-    printf("crc:%lu\n",crc);
+    //crc = crc32(crc, (const Bytef*)buf2 ,(uInt) pkt_get_total_length(pkt)-4);
+    
+    sprintf(crc2, "%lu", crc);
     //Buf = concat du flux et du crc calculé
    
+    strcat(buf2, crc2);
     
-    memcpy(buf, pkt_bytes, pkt_get_total_length(pkt)-4);
-    printf("mem2\n");
-    //memcpy(buf, &crc, sizeof(uint32_t));
-    printf("mem3\n");
-    *len = strlen(buf);
-    printf("%s\n",buf);
-    free(pkt_bytes);
-    return PKT_OK;
+    printf("BUFFER Final : %s\n", buf2);
 
+    *len = strlen(buf2);
+    printf("buf : %c\n",buf[35]);
+
+    return PKT_OK;
 }
 
 ptypes_t pkt_get_type  (const pkt_t* pkt)
@@ -234,7 +257,9 @@ pkt_status_code pkt_set_type(pkt_t *pkt, const ptypes_t type)
     if (type != PTYPE_ACK && type != PTYPE_DATA && type != PTYPE_NACK) {
         return E_TYPE;
     }
+    
     pkt->type = type;
+    
     return PKT_OK;
 }
 
