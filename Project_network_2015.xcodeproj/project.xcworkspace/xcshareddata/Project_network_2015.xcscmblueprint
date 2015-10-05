@@ -1,0 +1,30 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "F22D62F9274D0B817F8E1E0B02484DFDC0E6DEA4",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "5D7D14224AA0AABCE1E702AD13E79906120CD0E3" : 0,
+    "F22D62F9274D0B817F8E1E0B02484DFDC0E6DEA4" : 0
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "9F37CC91-34CA-4355-8C46-A329A535B325",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "5D7D14224AA0AABCE1E702AD13E79906120CD0E3" : "..",
+    "F22D62F9274D0B817F8E1E0B02484DFDC0E6DEA4" : "Project_network_2015\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "Project_network_2015",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "Project_network_2015.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/Zoetti\/network_project_2015.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "5D7D14224AA0AABCE1E702AD13E79906120CD0E3"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/Zoetti\/Network_project_2015.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "F22D62F9274D0B817F8E1E0B02484DFDC0E6DEA4"
+    }
+  ]
+}
