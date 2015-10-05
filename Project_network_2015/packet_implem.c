@@ -119,7 +119,9 @@ pkt_t* stock_in_packet(const char* data, const size_t len){
  * @return: A status code indicating the success or the failure type.
  * 			Unless the error is E_NOHEADER, the packet has at least the
  * 			values of the header found in the data stream.
- */
+
+*/
+
 pkt_status_code pkt_decode(const char *data, const size_t len, pkt_t *pkt)
 {
     pkt = stock_in_packet(data, len);
@@ -154,13 +156,14 @@ pkt_status_code pkt_encode(const pkt_t* pkt, char *buf, size_t *len)
     if (sizeof(pkt) > *len){
         return E_NOMEM;
     }
+
     //flux de bytes du payload et du header (sans le CRC)
     char* pkt_bytes = (char*)malloc(sizeof(pkt)-4);
     if (pkt_bytes == NULL){
         fprintf(stderr,"Impossible allocation \n");
         return E_NOMEM;
     }
-    memcpy(pkt_bytes, pkt, sizeof(pkt)-4);
+    memcpy(&pkt_bytes, pkt, sizeof(pkt)-4);
     uLong crc = crc32(0L, Z_NULL, 0);
     crc = crc32(crc, (const Bytef*)pkt_bytes , sizeof(pkt)-4);
     //Buf = concat du flux et du crc calculé
@@ -169,6 +172,7 @@ pkt_status_code pkt_encode(const pkt_t* pkt, char *buf, size_t *len)
     *len = sizeof(buf);
     free(pkt_bytes);
     return PKT_OK;
+    return E_WINDOW;
 }
 
 ptypes_t pkt_get_type  (const pkt_t* pkt)
@@ -252,4 +256,5 @@ pkt_status_code pkt_set_payload(pkt_t *pkt,
     memcpy(pkt->payload, payload, pkt->length);
     free(payload);
     return PKT_OK;
+
 }
