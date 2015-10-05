@@ -154,7 +154,7 @@ pkt_status_code pkt_encode(const pkt_t* pkt, char *buf, size_t *len)
     if (sizeof(pkt) > *len){
         return E_NOMEM;
     }
-    //flux de bytes du payload et du header (sans le CRC)
+    /*//flux de bytes du payload et du header (sans le CRC)
     char* pkt_bytes = (char*)malloc(sizeof(pkt)-4);
     if (pkt_bytes == NULL){
         fprintf(stderr,"Impossible allocation \n");
@@ -168,7 +168,8 @@ pkt_status_code pkt_encode(const pkt_t* pkt, char *buf, size_t *len)
     memcpy(buf, (char*)crc, 4);
     *len = sizeof(buf);
     free(pkt_bytes);
-    return PKT_OK;
+    return PKT_OK;*/
+    return E_WINDOW;
 }
 
 ptypes_t pkt_get_type  (const pkt_t* pkt)
@@ -253,3 +254,4 @@ pkt_status_code pkt_set_payload(pkt_t *pkt,
     free(payload);
     return PKT_OK;
 }
+
